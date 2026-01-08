@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google"; // Assuming these are the default fonts
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
+import { ExerciseProvider } from "@/context/ExerciseContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,10 +41,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
+        <ExerciseProvider>
+          <Header />
+          <main className="flex-1">
+            {children}
+          </main>
+        </ExerciseProvider>
       </body>
     </html>
   );

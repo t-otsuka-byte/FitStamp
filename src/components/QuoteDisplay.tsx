@@ -15,11 +15,9 @@ const QUOTES = [
   { text: "努力できることが才能である", author: "松井秀喜" },
   { text: "一回一回の練習に対して、自分なりのテーマを持って取り組んでいるか", author: "本田圭佑" },
   { text: "ステップ・バイ・ステップ。どんなことでも、何かを達成する場合、とるべき方法はただひとつ、一歩ずつ着実に立ち向かうことだ", author: "マイケル・ジョーダン" },
-  { text: "努力せずに何かできるようになる人のことを「天才」というのなら、僕はそうじゃない。努力した結果、何かができるようになる人のことを「天才」というのなら、僕はそうだと思う", author: "イチロー" },
   { text: "神様は乗り越えられない試練は与えない", author: "ドラマ『JIN-仁-』" },
   { text: "昨日の自分より、今日の自分。今日の自分より、明日の自分", author: "ローランド" },
-  { text: "一生懸命だと知恵が出る。中途半端だと愚痴が出る。いい加減だと言い訳が出る", author: "武田信玄" },
-  { text: "何かに挑戦したら確実に報われるのであれば、誰でも必ず挑戦するだろう。報われないかもしれないところで、同じ情熱、気力、モチベーションをもって継続しているのは非常に大変なことであり、私は、それこそが才能だと思っている", author: "羽生善治" },
+  { text: "一生懸命だと知恵が出る。中途半端だと愚痴が出る。いい加減だと言訳が出る", author: "武田信玄" },
 ];
 
 export function QuoteDisplay() {
@@ -75,7 +73,7 @@ export function QuoteDisplay() {
         
         <figure className="text-center">
           <blockquote className="mb-2 text-base font-medium leading-relaxed text-gray-800 dark:text-gray-100">
-            "{quote.text}"
+            {quote.text}
           </blockquote>
           <figcaption className="flex items-center justify-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
             <span className="h-px w-6 bg-orange-300 dark:bg-orange-700"></span>

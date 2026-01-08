@@ -1,95 +1,22 @@
 "use client";
 
 import * as React from "react";
-import confetti from "canvas-confetti";
 import { 
-  format, getDaysInMonth, startOfMonth, addMonths, subMonths, 
-  isSameMonth, isSameDay, isToday, subDays, parseISO, isAfter, isBefore 
+  format, getDaysInMonth, startOfMonth, addMonths, subMonths, isToday, isSameDay
 } from "date-fns";
 import { ja } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Check, Trophy, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useExercise } from "@/context/ExerciseContext";
 
 interface CalendarProps {
   className?: string;
 }
 
 export function Calendar({ className }: CalendarProps) {
-  const [currentDate, setCurrentDate] = React.useState(new Date());
-  const [stampedDates, setStampedDates] = React.useState<string[]>([]);
-  const [streak, setStreak] = React.useState(0);
-  const [monthlyCount, setMonthlyCount] = React.useState(0);
-
-  // Load stamps from localStorage on mount
-  React.useEffect(() => {
-    const saved = localStorage.getItem("exercise-stamps");
-    if (saved) {
-      try {
-        setStampedDates(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse stamps", e);
-      }
-    }
-  }, []);
-
-  // Calculate stats whenever stampedDates changes
-  React.useEffect(() => {
-    localStorage.setItem("exercise-stamps", JSON.stringify(stampedDates));
-    
-    // Calculate Streak
-    let currentStreak = 0;
-    const sortedDates = [...stampedDates].sort().reverse(); // Newest first
-    const todayStr = format(new Date(), "yyyy-MM-dd");
-    const yesterdayStr = format(subDays(new Date(), 1), "yyyy-MM-dd");
-    
-    // Check if the streak is active (stamped today or yesterday)
-    const hasToday = stampedDates.includes(todayStr);
-    const hasYesterday = stampedDates.includes(yesterdayStr);
-    
-    if (hasToday || hasYesterday) {
-      let checkDate = hasToday ? new Date() : subDays(new Date(), 1);
-      
-      while (true) {
-        const checkStr = format(checkDate, "yyyy-MM-dd");
-        if (stampedDates.includes(checkStr)) {
-          currentStreak++;
-          checkDate = subDays(checkDate, 1);
-        } else {
-          break;
-        }
-      }
-    }
-    setStreak(currentStreak);
-
-    // Calculate Monthly Count
-    const yearMonth = format(currentDate, "yyyy-MM");
-    const count = stampedDates.filter(d => d.startsWith(yearMonth)).length;
-    setMonthlyCount(count);
-
-  }, [stampedDates, currentDate]);
-
-  const toggleStamp = (date: Date) => {
-    const dateStr = format(date, "yyyy-MM-dd");
-    const isAdding = !stampedDates.includes(dateStr);
-    
-    if (isAdding) {
-      // Trigger confetti
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#fb923c', '#f87171', '#fbbf24'] // Orange, Red, Amber
-      });
-    }
-
-    setStampedDates((prev) => {
-      if (prev.includes(dateStr)) {
-        return prev.filter((d) => d !== dateStr);
-      } else {
-        return [...prev, dateStr];
-      }
-    });
-  };
+  const { 
+    currentDate, setCurrentDate, stampedDates, streak, monthlyCount, toggleStamp 
+  } = useExercise();
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
