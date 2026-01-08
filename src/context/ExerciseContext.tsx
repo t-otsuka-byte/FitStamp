@@ -16,32 +16,36 @@ interface ExerciseContextType {
 
 const ExerciseContext = createContext<ExerciseContextType | undefined>(undefined);
 
+import { getStamps, toggleStamp as toggleStampAction } from "@/actions/stamp";
+
 export function ExerciseProvider({ children }: { children: ReactNode }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [stampedDates, setStampedDates] = useState<string[]>([]);
   const [streak, setStreak] = useState(0);
   const [monthlyCount, setMonthlyCount] = useState(0);
   const [isClient, setIsClient] = useState(false);
+  const [userId, setUserId] = useState<string>("");
 
   // Initialize
   useEffect(() => {
     setIsClient(true);
-    const saved = localStorage.getItem("exercise-stamps");
-    if (saved) {
-      try {
-        setStampedDates(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse stamps", e);
-      }
+    // Get or create anonymous user ID
+    let id = localStorage.getItem("fitstamp-user-id");
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem("fitstamp-user-id", id);
     }
+    setUserId(id);
+
+    // Fetch stamps from DB
+    getStamps(id).then((dates) => {
+      setStampedDates(dates);
+    });
   }, []);
 
-  // Sync calculations
+  // Sync calculations (Streak & Monthly Count)
   useEffect(() => {
-    if (!isClient) return;
-    localStorage.setItem("exercise-stamps", JSON.stringify(stampedDates));
-    
-    // Streak
+    // Calculate Streak
     let currentStreak = 0;
     const sortedDates = [...stampedDates].sort().reverse();
     const todayStr = format(new Date(), "yyyy-MM-dd");
@@ -61,17 +65,20 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
     }
     setStreak(currentStreak);
 
-    // Monthly Count
+    // Calculate Monthly Count
     const yearMonth = format(currentDate, "yyyy-MM");
     const count = stampedDates.filter(d => d.startsWith(yearMonth)).length;
     setMonthlyCount(count);
 
-  }, [stampedDates, currentDate, isClient]);
+  }, [stampedDates, currentDate]);
 
-  const toggleStamp = (date: Date) => {
+  const toggleStamp = async (date: Date) => {
+    if (!userId) return;
+
     const dateStr = format(date, "yyyy-MM-dd");
     const isAdding = !stampedDates.includes(dateStr);
     
+    // Optimistic update
     if (isAdding) {
       confetti({
         particleCount: 100,
@@ -88,7 +95,11 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
         return [...prev, dateStr];
       }
     });
+
+    // Call Server Action
+    await toggleStampAction(userId, dateStr);
   };
+
 
   return (
     <ExerciseContext.Provider value={{
