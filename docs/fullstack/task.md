@@ -7,12 +7,17 @@
 - [/] Database Schema & Migration <!-- id: 5 -->
     - [x] Define `Stamp` model in `schema.prisma` <!-- id: 6 -->
     - [x] Run initial migration <!-- id: 7 -->
-- [/] Backend Implementation (Server Actions) <!-- id: 8 -->
+- [x] Backend Implementation (Server Actions) <!-- id: 8 -->
     - [x] Create `src/lib/db.ts` (Prisma Client singleton) <!-- id: 9 -->
-    - [/] Create `src/actions/stamp.ts` (Server Actions for getting/toggling stamps) <!-- id: 10 -->
-- [ ] Frontend Integration <!-- id: 11 -->
-    - [ ] Update `ExerciseContext` to use Server Actions instead of LocalStorage <!-- id: 12 -->
-    - [ ] Implement user identification (UUID via cookie or localStorage) for DB association <!-- id: 13 -->
-- [ ] Verification <!-- id: 14 -->
-    - [ ] Verify stamps are saved to DB <!-- id: 15 -->
-    - [ ] Verify data persists across browser clear (if cookie/ID preserved) <!-- id: 16 -->
+    - [x] Create `src/actions/stamp.ts` (Server Actions for getting/toggling stamps) <!-- id: 10 -->
+- [x] Frontend Integration <!-- id: 11 -->
+    - [x] Update `ExerciseContext` to use Server Actions instead of LocalStorage <!-- id: 12 -->
+    - [x] Implement user identification (UUID via cookie or localStorage) for DB association <!-- id: 13 -->
+- [x] Verification (Local) <!-- id: 14 -->
+    - [x] Verify stamps are saved to DB <!-- id: 15 -->
+    - [x] Verify data persists across browser clear (if cookie/ID preserved) <!-- id: 16 -->
+- [/] Cloud Deployment (Vercel + Neon) <!-- id: 17 -->
+    - [x] Configure Neon database connection <!-- id: 18 -->
+    - [x] Run migrations on cloud database <!-- id: 19 -->
+    - [x] Update `package.json` build scripts <!-- id: 20 -->
+    - [/] Deploy to Vercel <!-- id: 21 -->
