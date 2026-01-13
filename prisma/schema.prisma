@@ -22,3 +22,9 @@ model Stamp {
 
   @@index([userId])
 }
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+}

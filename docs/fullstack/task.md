@@ -16,8 +16,8 @@
 - [x] Verification (Local) <!-- id: 14 -->
     - [x] Verify stamps are saved to DB <!-- id: 15 -->
     - [x] Verify data persists across browser clear (if cookie/ID preserved) <!-- id: 16 -->
-- [/] Cloud Deployment (Vercel + Neon) <!-- id: 17 -->
+- [x] Cloud Deployment (Vercel + Neon) <!-- id: 17 -->
     - [x] Configure Neon database connection <!-- id: 18 -->
     - [x] Run migrations on cloud database <!-- id: 19 -->
     - [x] Update `package.json` build scripts <!-- id: 20 -->
-    - [/] Deploy to Vercel <!-- id: 21 -->
+    - [x] Deploy to Vercel (Integration Ready) <!-- id: 21 -->

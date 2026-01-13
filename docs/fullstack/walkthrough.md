@@ -8,6 +8,14 @@
 - **PostgreSQL**: 堅牢なリレーショナルデータベースを採用しました。
 - **Prisma**: データベース操作を安全かつ簡単に行うためのORMを導入しました。
 
+### 4. 💬 フィードバック機能 (Neon Direct SQL)
+提供されたガイドに基づき、Prismaを通さず直接SQLでデータを操作する機能を実装しました。
+- **実装**: `@neondatabase/serverless` の `neon()` クライアントを使用。
+- **機能**: カレンダー下のフォームからコメントを送信し、Neon DBの `Comment` テーブルに即座に反映。
+- **検証**: ブラウザからテストコメントを送信し、500エラーが出ることなく正常にデータベースへ保存されることを確認。
+
+![検証動画](file:///Users/admin/.gemini/antigravity/brain/b2d10bde-0931-4a83-a2e8-96b02f4a56c4/final_verification_comment_neon_1768317014241.webp)
+
 ### 2. 🔌 バックエンド
 - **Server Actions**: `src/actions/stamp.ts` にデータベース操作ロジックを集約しました。
     - `getStamps(userId)`: ユーザーのスタンプ一覧を取得
