@@ -12,6 +12,7 @@ interface ExerciseContextType {
   monthlyCount: number;
   toggleStamp: (date: Date) => void;
   totalCount: number;
+  userId: string;
 }
 
 const ExerciseContext = createContext<ExerciseContextType | undefined>(undefined);
@@ -37,10 +38,33 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
     }
     setUserId(id);
 
-    // Fetch stamps from DB
-    getStamps(id).then((dates) => {
-      setStampedDates(dates);
-    });
+    // Migration logic: old localStorage stamps to DB
+    const migrateOldData = async () => {
+      const oldStamps = localStorage.getItem("exercise-stamps");
+      if (oldStamps) {
+        try {
+          const dates = JSON.parse(oldStamps) as string[];
+          if (Array.isArray(dates) && dates.length > 0) {
+            console.log(`Migrating ${dates.length} stamps to DB...`);
+            // DBに保存（既にある場合は無視されるか更新される）
+            for (const d of dates) {
+              await toggleStampAction(id, d);
+            }
+          }
+          // 移行完了後に削除
+          localStorage.removeItem("exercise-stamps");
+          console.log("Migration complete.");
+        } catch (e) {
+          console.error("Migration failed:", e);
+        }
+      }
+      
+      // Fetch final stamps from DB
+      const dbStamps = await getStamps(id);
+      setStampedDates(dbStamps);
+    };
+
+    migrateOldData();
   }, []);
 
   // Sync calculations (Streak & Monthly Count)
@@ -97,7 +121,18 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
     });
 
     // Call Server Action
-    await toggleStampAction(userId, dateStr);
+    const result = await toggleStampAction(userId, dateStr);
+    if (result && !result.success) {
+      // Rollback on error
+      console.error("Failed to save stamp to DB, rolling back...");
+      setStampedDates((prev) => {
+        if (prev.includes(dateStr)) {
+          return prev.filter((d) => d !== dateStr);
+        } else {
+          return [...prev, dateStr];
+        }
+      });
+    }
   };
 
 
@@ -109,7 +144,8 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
       streak,
       monthlyCount,
       toggleStamp,
-      totalCount: stampedDates.length
+      totalCount: stampedDates.length,
+      userId // Expose userId
     }}>
       {children}
     </ExerciseContext.Provider>

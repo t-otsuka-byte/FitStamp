@@ -12,6 +12,24 @@ export default function Home() {
       </div>
 
       <CommentForm />
+
+      <footer className="mt-12 text-[10px] text-gray-300 font-mono">
+        Session ID: <SessionIdDisplay />
+      </footer>
     </div>
   );
 }
+
+function SessionIdDisplay() {
+  return (
+    <span className="select-all cursor-copy opacity-50 hover:opacity-100 transition-opacity">
+      {/* 
+        Client-only component to show the ID from context/localStorage 
+        Since Home is a Server Component by default, we use a small client wrapper
+      */}
+      <ClientSessionId />
+    </span>
+  );
+}
+
+import { ClientSessionId } from "@/components/ClientSessionId";

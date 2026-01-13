@@ -47,9 +47,10 @@ export async function toggleStamp(userId: string, date: string) {
     }
 
     revalidatePath("/");
+    console.log(`Success toggling stamp for user ${userId} on ${date}`);
     return { success: true };
   } catch (error) {
-    console.error("Failed to toggle stamp:", error);
+    console.error(`Failed to toggle stamp for user ${userId} on ${date}:`, error);
     return { success: false, error: "Failed to toggle stamp" };
   }
 }

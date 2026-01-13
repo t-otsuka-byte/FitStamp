@@ -20,6 +20,7 @@ model Stamp {
   date      String
   createdAt DateTime @default(now())
 
+  @@unique([userId, date])
   @@index([userId])
 }
 

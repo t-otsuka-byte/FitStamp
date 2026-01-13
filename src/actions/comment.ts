@@ -19,3 +19,10 @@ export async function createComment(formData: FormData) {
 
   revalidatePath('/');
 }
+
+export async function getComments() {
+  const sql = neon(process.env.DATABASE_URL!);
+  // @ts-ignore
+  const rows = await sql.query('SELECT * FROM "Comment" ORDER BY "createdAt" DESC LIMIT 10');
+  return rows;
+}

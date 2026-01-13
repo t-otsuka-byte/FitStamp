@@ -8,13 +8,19 @@
 - **PostgreSQL**: 堅牢なリレーショナルデータベースを採用しました。
 - **Prisma**: データベース操作を安全かつ簡単に行うためのORMを導入しました。
 
-### 4. 💬 フィードバック機能 (Neon Direct SQL)
-提供されたガイドに基づき、Prismaを通さず直接SQLでデータを操作する機能を実装しました。
-- **実装**: `@neondatabase/serverless` の `neon()` クライアントを使用。
-- **機能**: カレンダー下のフォームからコメントを送信し、Neon DBの `Comment` テーブルに即座に反映。
-- **検証**: ブラウザからテストコメントを送信し、500エラーが出ることなく正常にデータベースへ保存されることを確認。
+### 5. 🔄 データの自動移行 (Migration)
+「保存できていない」ように見える原因として、以前のブラウザデータ（LocalStorage）と新しいクラウドDBの同期が考えられたため、自動移行機能を実装しました。
+- **挙動**: アプリ起動時にLocalStorageに古いスタンプがあるかチェックし、あれば自動的にNeon DBへアップロードします。
+- **メリット**: これまで記録してきたデータを失うことなく、スムーズにクラウドへ移行できます。
 
-![検証動画](file:///Users/admin/.gemini/antigravity/brain/b2d10bde-0931-4a83-a2e8-96b02f4a56c4/final_verification_comment_neon_1768317014241.webp)
+### 6. 🆔 セッションIDの表示
+トラブルシューティングを容易にするため、ページ下部に `Session ID` を表示するようにしました。
+- 複数のデバイスで同じデータを見たい場合は、このIDを共有することで将来的に紐付けが可能です。
+
+### 7. 📘 ガイドコードへの対応
+「`comments` テーブルを作成する」というガイドのコードがそのまま動くよう、手動で `comments (comment TEXT)` テーブルもDBに作成済みです。
+
+![検証動画](file:///Users/admin/.gemini/antigravity/brain/b2d10bde-0931-4a83-a2e8-96b02f4a56c4/verify_migration_logic_localstorage_to_db_1768318313573.webp)
 
 ### 2. 🔌 バックエンド
 - **Server Actions**: `src/actions/stamp.ts` にデータベース操作ロジックを集約しました。
