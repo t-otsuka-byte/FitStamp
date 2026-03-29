@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "db:migrate": "sh -c 'if [ -f .env.local ]; then dotenv -e .env.local -- prisma migrate deploy; else prisma migrate deploy; fi'",
     "build": "prisma generate && sh -c 'if [ -f .env.local ]; then dotenv -e .env.local -- prisma migrate deploy; else prisma migrate deploy; fi' && next build",
     "start": "next start",
     "lint": "eslint"

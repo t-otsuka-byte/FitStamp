@@ -62,7 +62,17 @@ export async function mergeAnonymousStamps(
 
   const dates = [...new Set(anonymousStamps.map((s) => s.date))];
 
+  const rawMeta = user.user_metadata?.display_name;
+  const displayNameFromAuth =
+    typeof rawMeta === "string" && rawMeta.trim() ? rawMeta.trim() : null;
+
   const merged = await prisma.$transaction(async (tx) => {
+    await tx.userProfile.upsert({
+      where: { id: authId },
+      create: { id: authId, displayName: displayNameFromAuth },
+      update: { displayName: displayNameFromAuth },
+    });
+
     await tx.stamp.deleteMany({
       where: {
         userId: authId,
@@ -74,6 +84,8 @@ export async function mergeAnonymousStamps(
       where: { userId: trimmed },
       data: { userId: authId },
     });
+
+    await tx.userProfile.deleteMany({ where: { id: trimmed } });
 
     return result.count;
   });

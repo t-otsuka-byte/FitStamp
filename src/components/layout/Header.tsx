@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { Dumbbell } from 'lucide-react';
 import { HamburgerMenu } from '@/components/HamburgerMenu';
-import { AuthHeader } from '@/components/AuthHeader';
 
 export function Header() {
   return (
@@ -13,8 +12,7 @@ export function Header() {
           <Dumbbell className="h-6 w-6" />
           <span>FitStamp</span>
         </Link>
-        <nav className="flex flex-col items-end gap-1 text-sm font-medium">
-          <AuthHeader />
+        <nav className="flex items-center">
           <HamburgerMenu />
         </nav>
       </div>

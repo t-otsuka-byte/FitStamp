@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { ensureUserProfileForUserId } from "@/lib/profileDb";
 import { revalidatePath } from "next/cache";
 
 async function resolveStampUserId(anonymousUserId?: string) {
@@ -40,6 +41,8 @@ export async function toggleStamp(anonymousUserId: string, date: string) {
     if (!targetId) {
       return { success: false, error: "Unauthorized" };
     }
+
+    await ensureUserProfileForUserId(targetId);
 
     const existing = await prisma.stamp.findFirst({
       where: {

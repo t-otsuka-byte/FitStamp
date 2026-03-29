@@ -3,13 +3,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { syncProfileDisplayNameFromSession } from "@/actions/profile";
 import { createClient } from "@/lib/supabase/client";
+import {
+  DISPLAY_NAME_MAX_LENGTH,
+  validateDisplayNameInput,
+} from "@/lib/auth/displayName";
 
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -24,13 +30,35 @@ export default function LoginPage() {
 
     try {
       if (mode === "signup") {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-        });
+        const nameErr = validateDisplayNameInput(displayName);
+        if (nameErr) {
+          setError(nameErr);
+          setLoading(false);
+          return;
+        }
+        const trimmedName = displayName.trim();
+        const { data: signUpData, error: signUpError } =
+          await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                ...(trimmedName ? { display_name: trimmedName } : {}),
+              },
+            },
+          });
         if (signUpError) throw signUpError;
+
+        // メール確認を Supabase でオフにしていると session が返り、その場でログイン済みになる
+        if (signUpData.session) {
+          await syncProfileDisplayNameFromSession();
+          router.push("/");
+          router.refresh();
+          return;
+        }
+
         setMessage(
-          "確認メールを送信しました。メール内のリンクを開いてからログインしてください（確認をオフにしている場合はそのままログインできます）。",
+          "確認メールを送信しました。メール内のリンクを開いてからログインしてください。",
         );
         setMode("login");
       } else {
@@ -39,6 +67,7 @@ export default function LoginPage() {
           password,
         });
         if (signInError) throw signInError;
+        await syncProfileDisplayNameFromSession();
         router.push("/");
         router.refresh();
       }
@@ -65,6 +94,7 @@ export default function LoginPage() {
             setMode("login");
             setError(null);
             setMessage(null);
+            setDisplayName("");
           }}
           className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
             mode === "login"
@@ -129,6 +159,27 @@ export default function LoginPage() {
             className="w-full rounded-xl border border-orange-100 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 dark:border-gray-700 dark:bg-gray-900"
           />
         </div>
+
+        {mode === "signup" && (
+          <div>
+            <label
+              htmlFor="displayName"
+              className="mb-1 block text-xs font-medium text-gray-600"
+            >
+              表示名（任意）
+            </label>
+            <input
+              id="displayName"
+              type="text"
+              autoComplete="nickname"
+              maxLength={DISPLAY_NAME_MAX_LENGTH}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="メニューなどに表示されます"
+              className="w-full rounded-xl border border-orange-100 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 dark:border-gray-700 dark:bg-gray-900"
+            />
+          </div>
+        )}
 
         {error && (
           <p className="text-sm text-red-600" role="alert">

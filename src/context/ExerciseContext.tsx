@@ -20,7 +20,9 @@ interface ExerciseContextType {
   setCurrentDate: (date: Date) => void;
   stampedDates: string[];
   streak: number;
-  monthlyCount: number;
+  /** 連続記録の目標日数（ユーザー設定・localStorage） */
+  streakGoal: number;
+  setStreakGoal: (days: number) => void;
   toggleStamp: (date: Date) => void;
   totalCount: number;
   userId: string;
@@ -31,13 +33,25 @@ const ExerciseContext = createContext<ExerciseContextType | undefined>(
 );
 
 const STORAGE_KEY = "fitstamp-user-id";
+const STREAK_GOAL_KEY = "fitstamp-streak-goal";
+const STREAK_GOAL_DEFAULT = 7;
+const STREAK_GOAL_MIN = 1;
+const STREAK_GOAL_MAX = 365;
+
+function clampStreakGoal(n: number) {
+  return Math.min(
+    STREAK_GOAL_MAX,
+    Math.max(STREAK_GOAL_MIN, Math.round(Number(n)) || STREAK_GOAL_DEFAULT),
+  );
+}
 
 export function ExerciseProvider({ children }: { children: ReactNode }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [stampedDates, setStampedDates] = useState<string[]>([]);
   const [userId, setUserId] = useState<string>("");
+  const [streakGoal, setStreakGoalState] = useState(STREAK_GOAL_DEFAULT);
 
-  const { streak, monthlyCount } = useMemo(() => {
+  const streak = useMemo(() => {
     let currentStreak = 0;
     const todayStr = format(new Date(), "yyyy-MM-dd");
     const yesterdayStr = format(subDays(new Date(), 1), "yyyy-MM-dd");
@@ -60,10 +74,27 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const yearMonth = format(currentDate, "yyyy-MM");
-    const count = stampedDates.filter((d) => d.startsWith(yearMonth)).length;
-    return { streak: currentStreak, monthlyCount: count };
-  }, [stampedDates, currentDate]);
+    return currentStreak;
+  }, [stampedDates]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = localStorage.getItem(STREAK_GOAL_KEY);
+    if (raw !== null) {
+      const n = parseInt(raw, 10);
+      if (!Number.isNaN(n)) {
+        setStreakGoalState(clampStreakGoal(n));
+      }
+    }
+  }, []);
+
+  const setStreakGoal = (days: number) => {
+    const next = clampStreakGoal(days);
+    setStreakGoalState(next);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STREAK_GOAL_KEY, String(next));
+    }
+  };
 
   useEffect(() => {
     const supabase = createClient();
@@ -198,7 +229,8 @@ export function ExerciseProvider({ children }: { children: ReactNode }) {
         setCurrentDate,
         stampedDates,
         streak,
-        monthlyCount,
+        streakGoal,
+        setStreakGoal,
         toggleStamp,
         totalCount: stampedDates.length,
         userId,

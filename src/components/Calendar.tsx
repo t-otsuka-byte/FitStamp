@@ -1,10 +1,22 @@
 "use client";
 
-import { 
-  format, getDaysInMonth, startOfMonth, addMonths, subMonths, isToday, isSameDay
+import { useState, useEffect } from "react";
+import {
+  format,
+  getDaysInMonth,
+  startOfMonth,
+  addMonths,
+  subMonths,
+  isToday,
 } from "date-fns";
 import { ja } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Check, Trophy, Flame } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Flame,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useExercise } from "@/context/ExerciseContext";
 
@@ -13,9 +25,22 @@ interface CalendarProps {
 }
 
 export function Calendar({ className }: CalendarProps) {
-  const { 
-    currentDate, setCurrentDate, stampedDates, streak, monthlyCount, toggleStamp 
+  const {
+    currentDate,
+    setCurrentDate,
+    stampedDates,
+    streak,
+    streakGoal,
+    setStreakGoal,
+    toggleStamp,
   } = useExercise();
+
+  const [goalOpen, setGoalOpen] = useState(false);
+  const [draftGoal, setDraftGoal] = useState(String(streakGoal));
+
+  useEffect(() => {
+    if (goalOpen) setDraftGoal(String(streakGoal));
+  }, [goalOpen, streakGoal]);
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -35,31 +60,28 @@ export function Calendar({ className }: CalendarProps) {
 
   return (
     <div className={cn("w-full max-w-md", className)}>
-      {/* Stats Section */}
-      <div className="mb-6 grid grid-cols-2 gap-4">
-        {/* Streak Card */}
-        <div className="flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 p-4 text-white shadow-lg shadow-orange-500/20 transition-transform hover:scale-105">
+      <div className="mb-6">
+        <button
+          type="button"
+          onClick={() => setGoalOpen(true)}
+          className="flex w-full flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 p-4 text-white shadow-lg shadow-orange-500/20 transition-transform hover:scale-[1.02] active:scale-95"
+        >
           <div className="mb-1 flex items-center gap-2 opacity-90">
             <Flame className="h-5 w-5 animate-pulse" />
-            <span className="text-xs font-bold uppercase tracking-wider">連続記録</span>
+            <span className="text-xs font-bold uppercase tracking-wider">
+              連続の目標
+            </span>
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-black tracking-tight">{streak}</span>
+            <span className="text-4xl font-black tabular-nums tracking-tight">
+              {streakGoal}
+            </span>
             <span className="text-sm font-bold opacity-80">日</span>
           </div>
-        </div>
-        
-        {/* Monthly Count Card */}
-        <div className="flex flex-col items-center justify-center rounded-2xl bg-white p-4 shadow-lg shadow-gray-200/50 ring-1 ring-gray-100 transition-transform hover:scale-105 dark:bg-gray-900 dark:shadow-none dark:ring-gray-800">
-          <div className="mb-1 flex items-center gap-2 text-gray-500 dark:text-gray-400">
-            <Trophy className="h-5 w-5 text-yellow-500" />
-            <span className="text-xs font-bold uppercase tracking-wider">今月の達成</span>
-          </div>
-          <div className="flex items-baseline gap-1 text-gray-900 dark:text-white">
-            <span className="text-4xl font-black tracking-tight">{monthlyCount}</span>
-            <span className="text-sm font-bold text-gray-500 dark:text-gray-500">回</span>
-          </div>
-        </div>
+          <span className="mt-1 text-[11px] opacity-80">
+            現在 {streak} 日連続
+          </span>
+        </button>
       </div>
 
       <div className="rounded-2xl bg-white p-6 shadow-xl shadow-gray-200/50 dark:bg-gray-900 dark:shadow-none">
@@ -126,6 +148,75 @@ export function Calendar({ className }: CalendarProps) {
         })}
       </div>
     </div>
+
+      {goalOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="streak-goal-title"
+          onClick={() => setGoalOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h2
+                id="streak-goal-title"
+                className="text-lg font-bold text-gray-900 dark:text-white"
+              >
+                連続の目標
+              </h2>
+              <button
+                type="button"
+                onClick={() => setGoalOpen(false)}
+                className="rounded-full p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                aria-label="閉じる"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="mb-6 flex items-baseline gap-2">
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                maxLength={3}
+                value={draftGoal}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, "").slice(0, 3);
+                  setDraftGoal(digits);
+                }}
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-2xl font-bold tabular-nums text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              />
+              <span className="shrink-0 text-lg font-medium text-gray-600 dark:text-gray-300">
+                日
+              </span>
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setGoalOpen(false)}
+                className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const n = parseInt(draftGoal, 10);
+                  if (!Number.isNaN(n)) setStreakGoal(n);
+                  setGoalOpen(false);
+                }}
+                className="flex-1 rounded-xl bg-orange-500 py-3 text-sm font-bold text-white hover:bg-orange-600"
+              >
+                保存
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
