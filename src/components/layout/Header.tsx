@@ -1,7 +1,6 @@
 "use client";
 
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 import { Dumbbell } from 'lucide-react';
 import { HamburgerMenu } from '@/components/HamburgerMenu';
 
@@ -13,7 +12,7 @@ export function Header() {
           <Dumbbell className="h-6 w-6" />
           <span>FitStamp</span>
         </Link>
-        <nav className="flex items-center gap-6 text-sm font-medium">
+        <nav className="flex items-center">
           <HamburgerMenu />
         </nav>
       </div>

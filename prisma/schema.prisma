@@ -14,11 +14,22 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+/// アプリ内ユーザー（匿名 UUID も Supabase の user.id もここに紐づく）。Stamp 参照用に表示名を保持する。
+model UserProfile {
+  id          String   @id
+  displayName String?  @map("display_name")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  stamps      Stamp[]
+
+  @@map("UserProfile")
+}
+
 model Stamp {
-  id        String   @id @default(uuid())
+  id        String      @id @default(uuid())
   userId    String
   date      String
-  createdAt DateTime @default(now())
+  createdAt DateTime    @default(now())
+  user      UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
   @@index([userId])

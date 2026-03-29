@@ -1,13 +1,28 @@
 "use server";
 
 import prisma from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
+import { ensureUserProfileForUserId } from "@/lib/profileDb";
 import { revalidatePath } from "next/cache";
 
-export async function getStamps(userId: string) {
+async function resolveStampUserId(anonymousUserId?: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) return user.id;
+  if (anonymousUserId) return anonymousUserId;
+  return null;
+}
+
+export async function getStamps(anonymousUserId?: string) {
   try {
+    const targetId = await resolveStampUserId(anonymousUserId);
+    if (!targetId) return [];
+
     const stamps = await prisma.stamp.findMany({
       where: {
-        userId: userId,
+        userId: targetId,
       },
       select: {
         date: true,
@@ -20,11 +35,18 @@ export async function getStamps(userId: string) {
   }
 }
 
-export async function toggleStamp(userId: string, date: string) {
+export async function toggleStamp(anonymousUserId: string, date: string) {
   try {
+    const targetId = await resolveStampUserId(anonymousUserId);
+    if (!targetId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    await ensureUserProfileForUserId(targetId);
+
     const existing = await prisma.stamp.findFirst({
       where: {
-        userId: userId,
+        userId: targetId,
         date: date,
       },
     });
@@ -39,7 +61,7 @@ export async function toggleStamp(userId: string, date: string) {
     } else {
       await prisma.stamp.create({
         data: {
-          userId: userId,
+          userId: targetId,
           date: date,
         },
       });
@@ -47,10 +69,10 @@ export async function toggleStamp(userId: string, date: string) {
     }
 
     revalidatePath("/");
-    console.log(`Success toggling stamp for user ${userId} on ${date}`);
+    console.log(`Success toggling stamp for user ${targetId} on ${date}`);
     return { success: true };
   } catch (error) {
-    console.error(`Failed to toggle stamp for user ${userId} on ${date}:`, error);
+    console.error(`Failed to toggle stamp on ${date}:`, error);
     return { success: false, error: "Failed to toggle stamp" };
   }
 }
