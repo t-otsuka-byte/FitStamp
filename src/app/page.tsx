@@ -1,6 +1,5 @@
 import { Calendar } from "@/components/Calendar";
 import { QuoteDisplay } from "@/components/QuoteDisplay";
-import { CommentForm } from "@/components/CommentForm";
 
 export default function Home() {
   return (
@@ -10,9 +9,6 @@ export default function Home() {
       <div className="mt-8 w-full max-w-md text-center">
         <QuoteDisplay />
       </div>
-
-      <CommentForm />
-
       <footer className="mt-12 text-[10px] text-gray-300 font-mono">
         Session ID: <SessionIdDisplay />
       </footer>
