@@ -1,4 +1,5 @@
 import { Calendar } from "@/components/Calendar";
+import { ClientSessionId } from "@/components/ClientSessionId";
 import { QuoteDisplay } from "@/components/QuoteDisplay";
 
 export default function Home() {
@@ -27,5 +28,3 @@ function SessionIdDisplay() {
     </span>
   );
 }
-
-import { ClientSessionId } from "@/components/ClientSessionId";
